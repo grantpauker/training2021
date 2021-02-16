@@ -1,0 +1,9 @@
+numpy
+pyfrc
+robotpy-ctre
+wpilib
+robotpy-wpilib-utilities
+robotpy-halsim-gui
+
+black
+
