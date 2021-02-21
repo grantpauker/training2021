@@ -9,9 +9,8 @@ from wpilib.kinematics import (ChassisSpeeds, DifferentialDriveKinematics,
                                DifferentialDriveOdometry,
                                DifferentialDriveWheelSpeeds)
 
-from controls import motorfeedforward, motorstate
 from utils import lazypigeonimu, lazytalonfx, units
-
+from controls import motorstate
 
 class WheelState:
     def __init__(self, left=0, right=0):
@@ -33,6 +32,11 @@ class WheelState:
 class Chassis:
 
     # chassis physical constants
+    WHEEL_DIAMETER = 6 * units.inches
+    WHEEL_RADIUS = WHEEL_DIAMETER / 2
+    WHEEL_CIRCUMFERENCE = 2 * np.pi * WHEEL_RADIUS
+    GEAR_RATIO = (48 / 14) * (50 / 16)  # 10.7142861
+
     BUMPER_WIDTH = 3.25 * units.inches
     ROBOT_WIDTH = 30 * units.inches + BUMPER_WIDTH
     ROBOT_LENGTH = 30 * units.inches + BUMPER_WIDTH
@@ -40,11 +44,6 @@ class Chassis:
 
     TRACK_WIDTH = 24 * units.inches
     TRACK_RADIUS = TRACK_WIDTH / 2
-
-    WHEEL_DIAMETER = 6 * units.inches
-    WHEEL_RADIUS = WHEEL_DIAMETER / 2
-    WHEEL_CIRCUMFERENCE = 2 * np.pi * WHEEL_RADIUS
-    GEAR_RATIO = (48 / 14) * (50 / 16)  # 10.7142861
 
     # conversions
     RADIANS_PER_METER = (2 * np.pi * GEAR_RATIO) / WHEEL_CIRCUMFERENCE
@@ -72,11 +71,6 @@ class Chassis:
 
     # joystick
     MAX_JOYSTICK_OUTPUT = 1
-
-    # static objeccts
-    feedforward_l = motorfeedforward.MotorFeedforward(KS, KV, KA)
-    feedforward_r = motorfeedforward.MotorFeedforward(KS, KV, KA)
-    kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
 
     # required devices
     dm_l: lazytalonfx.LazyTalonFX
@@ -181,15 +175,15 @@ class Chassis:
     def getPose(self):
         if wpilib.RobotBase.isSimulation():
             x = (
-                hal.simulation.SimDeviceSim("Field2D").getDouble("x").get()
+                wpilib.simulation.SimDeviceSim("Field2D").getDouble("x").get()
                 * units.meters
             )
             y = (
-                hal.simulation.SimDeviceSim("Field2D").getDouble("y").get()
+                wpilib.simulation.SimDeviceSim("Field2D").getDouble("y").get()
                 * units.meters
             )
             rot = (
-                hal.simulation.SimDeviceSim("Field2D").getDouble("rot").get()
+                wpilib.simulation.SimDeviceSim("Field2D").getDouble("rot").get()
                 * units.degrees
             )
             rot = units.angle_range(rot)
@@ -198,13 +192,13 @@ class Chassis:
             return self.odometry.getPose()
 
     def _setSimulationOutput(self, id, output):
-        hal.simulation.SimDeviceSim(f"Talon FX[{id}]").getDouble("Motor Output").set(
+        wpilib.simulation.SimDeviceSim(f"Talon FX[{id}]").getDouble("Motor Output").set(
             output
         )
 
     def _getSimulationPosition(self, id):
         return (
-            hal.simulation.SimDeviceSim(f"Custom Talon FX[{id}]")
+            wpilib.simulation.SimDeviceSim(f"Custom Talon FX[{id}]")
             .getDouble("Position")
             .get()
         )

@@ -4,9 +4,7 @@ import hal
 import numpy as np
 import wpilib
 from magicbot import MagicRobot
-
-from autonomous import trajectories
-from components import trajectorytracker
+from utils import units
 from components.chassis import Chassis
 from utils import lazypigeonimu, lazytalonfx
 
@@ -21,7 +19,6 @@ class Robot(MagicRobot):
     ACTUATOR_ID = 5
 
     chassis: Chassis
-    trajectorytracker: trajectorytracker.TrajectoryTracker
 
     def createObjects(self):
         """Initialize all wpilib motors & sensors"""
@@ -42,11 +39,8 @@ class Robot(MagicRobot):
 
     def robotPeriodic(self):
         pass
-        # print(self.trajectorytracker.is_executing)
 
     def teleopPeriodic(self):
-        """Place code here that does things as a result of operator
-           actions"""
         try:
             throttle = -self.driver.getRawAxis(1)
             throttle = 0 if abs(throttle) <= 0.3 else throttle
@@ -54,12 +48,7 @@ class Robot(MagicRobot):
             rotation = -self.driver.getRawAxis(3)
             rotation = 0 if abs(rotation) <= 0.3 else rotation / 3
 
-            throttle = (self.driver.getRawAxis(5) + 1) / 2
-            throttle = 0 if abs(throttle) <= 0.3 else throttle
-            reverse = (self.driver.getRawAxis(2) + 1) / 2
-            reverse = 0 if abs(reverse) <= 0.3 else reverse
-
-            self.chassis.setForzaDrive(throttle, reverse, rotation)
+            self.chassis.setTankDrive(1.0, rotation)
         except:
             self.onException()
 

@@ -20,7 +20,7 @@ talon0 = hal.SimDevice("Custom Talon FX[1]")
 talon1 = hal.SimDevice("Custom Talon FX[3]")
 talon0.createDouble("Position", False, 0)
 talon1.createDouble("Position", False, 0)
-
+import wpilib.simulation
 
 class PhysicsEngine:
     """
@@ -33,9 +33,10 @@ class PhysicsEngine:
 
     @staticmethod
     def setSimulationPose(pose):
-        hal.simulation.SimDeviceSim(f"Field2D").getDouble("x").set(pose.translation().x)
-        hal.simulation.SimDeviceSim(f"Field2D").getDouble("y").set(pose.translation().y)
-        hal.simulation.SimDeviceSim(f"Field2D").getDouble("rot").set(
+        
+        wpilib.simulation.SimDeviceSim(f"Field2D").getDouble("x").set(pose.translation().x)
+        wpilib.simulation.SimDeviceSim(f"Field2D").getDouble("y").set(pose.translation().y)
+        wpilib.simulation.SimDeviceSim(f"Field2D").getDouble("rot").set(
             pose.rotation().degrees()
         )
 
@@ -58,13 +59,13 @@ class PhysicsEngine:
 
     def getMotorSpeed(self, id):
         return (
-            hal.simulation.SimDeviceSim(f"Talon FX[{id}]")
+            wpilib.simulation.SimDeviceSim(f"Talon FX[{id}]")
             .getDouble("Motor Output")
             .get()
         )
 
     def setMotorPosition(self, id, position):
-        hal.simulation.SimDeviceSim(f"Custom Talon FX[{id}]").getDouble("Position").set(
+        wpilib.simulation.SimDeviceSim(f"Custom Talon FX[{id}]").getDouble("Position").set(
             position
         )
 
@@ -92,3 +93,4 @@ class PhysicsEngine:
         )
 
         pose = self.physics_controller.move_robot(transform)
+        PhysicsEngine.setSimulationPose(pose)
